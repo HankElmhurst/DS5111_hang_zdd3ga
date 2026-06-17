@@ -25,7 +25,7 @@ def  youtube_id_validation(id):
 	return True
 
 
-if  __name__ == "__main__":
+def main():
 	try:
 		for line in sys.stdin:
 			# Strip newline characters and extra spaces
@@ -42,3 +42,6 @@ if  __name__ == "__main__":
 	except KeyboardInterrupt:
 		print()
 		sys.exit()
+
+if __name__ == "__name__":
+	main()
