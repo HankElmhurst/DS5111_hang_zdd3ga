@@ -3,6 +3,8 @@ import io
 import pytest
 from scripts.clean_ids import main, youtube_id_validation
 
+import platform
+import sys
 
 
 def test_script_execution(monkeypatch, capsys):
@@ -36,5 +38,24 @@ def test_script_execution(monkeypatch, capsys):
     ] 
 )
 
+# Test youtube_id_validation function
 def test_youtube_id_validation(test_input, expected_output):
     assert youtube_id_validation(test_input) == expected_output
+
+# Test if OS is Ubuntu
+def test_os_is_ubuntu():
+    assert platform.freedesktop_os_release()["ID"] == "ubuntu"
+
+# Test Python Version
+def test_python_version():
+    assert sys.version_info.major == 3
+
+# Expected to fail expression 
+@pytest.mark.xfail(reason="demonstrating xfail")
+def test_expected_to_fail():
+    assert 1 == 2
+
+# Expected to be skipped
+@pytest.mark.skip(reason="feature not ready")
+def test_placeholder():
+    assert True
