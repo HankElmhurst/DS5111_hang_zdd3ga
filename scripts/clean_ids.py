@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
+"""Validate and filter YouTube IDs from stdin."""
+
 import string
 import sys
 import logging
 
-import pytest
-
 logging.basicConfig(filename = "pipeline_audit.log", level = logging.WARNING)
 
-def youtube_id_validation(id):
+def youtube_id_validation(video_id):
+    """Return True if video_id is a valid 11-char URL-safe Base64 string."""
+
     alphabets = string.ascii_letters
     digits = string.digits
     hyphen = "-"
@@ -16,17 +18,19 @@ def youtube_id_validation(id):
 
     valid_char_set = alphabets + digits + hyphen + under_score
 
-    if len(id) != 11:
-        logging.warning(f"invalid ID length. {id}")
+    if len(video_id) != 11:
+        logging.warning("invalid ID length: %s", video_id)
         return False
-    else:
-        for letter in id:
-            if letter not in valid_char_set:
-                logging.warning(f"invalid letters in ID entry: {id}")
-                return False
+
+    for letter in video_id:
+        if letter not in valid_char_set:
+            logging.warning("invalid letters in ID entry: %s", video_id)
+            return False
+
     return True
 
 def main():
+    """ Read IDs from stdin, print valid ones, log invalid ones. """
     try:
         for line in sys.stdin:
             # Strip newline characters and extra spaces
@@ -44,5 +48,5 @@ def main():
         print()
         sys.exit()
 
-if __name__ == "__name__":
+if __name__ == "__main__":
     main()
