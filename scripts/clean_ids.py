@@ -1,44 +1,52 @@
 #!/usr/bin/env python3
 
+"""Validate and filter YouTube IDs from stdin."""
+
 import string
 import sys
 import logging
 
 logging.basicConfig(filename = "pipeline_audit.log", level = logging.WARNING)
 
-def  youtube_id_validation(id):
-	alphabets = string.ascii_letters
-	digits = string.digits
-	hyphen = "-"
-	under_score = "_"
+def youtube_id_validation(video_id):
+    """Return True if video_id is a valid 11-char URL-safe Base64 string."""
 
-	valid_char_set = alphabets + digits + hyphen + under_score
+    alphabets = string.ascii_letters
+    digits = string.digits
+    hyphen = "-"
+    under_score = "_"
 
-	if len(id) != 11:
-		logging.warning(f"invalid ID length. {id}")
-		return False
-	else:
-		for letter in id:
-			if letter not in valid_char_set:
-				logging.warning(f"invalid letters in ID entry: {id}")
-				return False
-	return True
+    valid_char_set = alphabets + digits + hyphen + under_score
 
+    if len(video_id) != 11:
+        logging.warning("invalid ID length: %s", video_id)
+        return False
 
-if  __name__ == "__main__":
-	try:
-		for line in sys.stdin:
-			# Strip newline characters and extra spaces
-			clean_line = line.strip()
+    for letter in video_id:
+        if letter not in valid_char_set:
+            logging.warning("invalid letters in ID entry: %s", video_id)
+            return False
 
-			# Skip empty lines
-			if not clean_line:
-				continue
+    return True
 
-			# If the line has an entry, validate the input
-			if youtube_id_validation(clean_line):
-				print(clean_line)
+def main():
+    """ Read IDs from stdin, print valid ones, log invalid ones. """
+    try:
+        for line in sys.stdin:
+            # Strip newline characters and extra spaces
+            clean_line = line.strip()
 
-	except KeyboardInterrupt:
-		print()
-		sys.exit()
+            # Skip empty lines
+            if not clean_line:
+                continue
+
+            # If the line has an entry, validate the input
+            if youtube_id_validation(clean_line):
+                print(clean_line)
+
+    except KeyboardInterrupt:
+        print()
+        sys.exit()
+
+if __name__ == "__main__":
+    main()
