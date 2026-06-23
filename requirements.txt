@@ -2,3 +2,5 @@ pandas
 numpy
 pylint
 pytest
+python-dotenv==1.2.2
+youtube-transcript-api==1.2.4

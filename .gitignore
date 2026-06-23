@@ -1,1 +1,3 @@
 __pycache__/
+.env
+pipeline/logs/*.log
