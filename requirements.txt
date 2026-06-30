@@ -4,3 +4,4 @@ pylint
 pytest
 python-dotenv==1.2.2
 youtube-transcript-api==1.2.4
+google-genai==2.10.0
