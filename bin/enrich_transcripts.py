@@ -149,13 +149,15 @@ def main(argv=None):
     # If the token is missing, log a critical failure and terminate the system.
     # Otherwise, instantiate the official Google GenAI Client utility.
     # -------------------------------------------------------------------------
-    my_api_key = os.getenv("GEMINI_API_KEY")
-
-    if not my_api_key:
-        logging.critical("No API Key exists. ")
-        sys.exit(1)
-
     if args.LLM == "Gemini":
+        # Getting Gemini API Key
+        my_api_key = os.getenv("GEMINI_API_KEY")
+
+        # Handle Missing API Key 
+        if not my_api_key:
+            logging.critical("No API Key exists. ")
+            sys.exit(1)
+
         client = genai.Client(api_key=my_api_key)
         strategy = GeminiStrategy(client)
     else:
