@@ -110,6 +110,7 @@ class EnrichmentEngine:
             if not line:
                 continue
 
+            # Step 1: Parse inbound records
             try:
                 data = json.loads(line)
                 video_id = data["video_id"]
@@ -119,12 +120,14 @@ class EnrichmentEngine:
                 logging.error("Failed to parse incoming JSON info: %s ", e)
                 continue
 
+            # Step 2: Delegate enrichment to a LLM Strategy. Not vendor specific
             try:
                 enriched_result = self.strategy.enrich(video_id, raw_text)
                 sys.stdout.write(json.dumps(enriched_result) + "\n")
                 sys.stdout.flush()
             except Exception as e:
                 logging.error("Failed processing video %s during LLM generation: %s ", video_id, e)
+                continue
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description = "Multi-LLM Strategy Transcript Enrichment Node.")
