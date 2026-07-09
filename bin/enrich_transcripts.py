@@ -84,7 +84,6 @@ class GeminiStrategy(LLMStrategy):
         # Inject the constructed prompt along with the raw text sequence payload.
         # Map the configuration block to use the structured JSON mime-type
         # and enforce your defined response schema parameters.
-        # Write the resulting text explicitly to sys.stdout and flush immediately.
         # ---------------------------------------------------------------------
         response = self.client.models.generate_content(
             model='gemini-2.5-flash',
@@ -95,7 +94,9 @@ class GeminiStrategy(LLMStrategy):
             )
         )
 
-        return json.loads(response.text)
+        result = json.loads(response.text)
+        result["video_id"] = video_id
+        return result
 
 class EnrichmentEngine:
     """Stream transcripts from stdin through a strategy and emit enriched JSON to stdout. """
