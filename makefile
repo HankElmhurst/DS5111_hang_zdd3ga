@@ -1,17 +1,28 @@
+# Local automation contract for 2605_DS5111_zdd3ga
+# Explicit virtual-environment routing - no reliance on shell activation.
+
+ENV = env
+PYTHON = $(ENV)/bin/python3
+PIP = $(ENV)/bin/pip
+PYLINTRC = pylintrc
+
+.PHONY: default env update lint test run
+
 default:
 	@cat makefile
 
 env:
-	python3 -m venv env; . env/bin/activate; pip install --upgrade pip
+	python3 -m venv $(ENV)
+	$(PIP) install --upgrade pip
 
-update:  env
-	. env/bin/activate; pip install -r requirements.txt
+update: env
+	$(PIP) install -r requirements.txt
 
 lint:
-	-. env/bin/activate; pylint scripts/
+	$(PYTHON) -m pylint --rcfile=$(PYLINTRC) bin/ tests/
 
-test: lint
-	. env/bin/activate; pytest -vv tests
+test:
+	$(PYTHON) -m pytest -vv tests/
 
-test_enrich:
-	. env/bin/activate; python bin/enrich_transcripts.py < mock_transcripts.jsonl | python bin/validate_schema.py
+run:
+	$(PYTHON) bin/enrich_transcripts.py < mock_transcripts.jsonl | $(PYTHON) bin/validate_schema.py

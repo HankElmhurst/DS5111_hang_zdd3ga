@@ -52,7 +52,7 @@ class LLMStrategy(ABC):
               - tech_terms   (list[str], optional)
               - book_names   (list[str], optional)
 
-            video_id is echoed back by the concrete strategy 
+            video_id is echoed back by the concrete strategy
             so the returned dict matches the full downstream schema
         """
         pass
@@ -73,7 +73,8 @@ class GeminiStrategy(LLMStrategy):
         }
 
     def enrich(self, video_id, raw_text) -> dict:
-        prompt = f""" You are an elite data engineer. Clean this transcript text for video_id '{video_id}'.
+        prompt = f""" You are an elite data engineer.
+            Clean this transcript text for video_id '{video_id}'.
             1. Strip all timestamps and duration codes.
             2. Extract technical architecture terms and books.
             """
@@ -115,7 +116,8 @@ class EnrichmentEngine:
                 data = json.loads(line)
                 video_id = data["video_id"]
                 raw_text = data["raw_text"]
-                logging.info("Orchestrating %s enrichment for video: %s ", type(self.strategy).__name__, video_id)
+                logging.info("Orchestrating %s enrichment for video: %s ",
+                             type(self.strategy).__name__, video_id)
             except Exception as e:
                 logging.error("Failed to parse incoming JSON info: %s ", e)
                 continue
@@ -130,6 +132,7 @@ class EnrichmentEngine:
                 continue
 
 def main(argv=None):
+    """Parse the --LLM choice, build the strategy, and run the enrichment engine on stdin."""
     parser = argparse.ArgumentParser(description = "Multi-LLM Strategy Transcript Enrichment Node.")
 
     parser.add_argument(
@@ -153,7 +156,7 @@ def main(argv=None):
         # Getting Gemini API Key
         my_api_key = os.getenv("GEMINI_API_KEY")
 
-        # Handle Missing API Key 
+        # Handle Missing API Key
         if not my_api_key:
             logging.critical("No API Key exists. ")
             sys.exit(1)
