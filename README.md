@@ -1,15 +1,20 @@
-# DS5111_hang_zdd3ga
+# 2605_DS5111_zdd3ga
 
-Software Automation in Data Science — environment bootstrap for a fresh VM.
+Software Automation in Data Science — YouTube transcript enrichment pipeline.
 
-This repo automates going from a bare Ubuntu VM to a working Python data-science
-environment, backed up on GitHub.
+## Project objective
+
+This repo runs a three-stage pipeline: extract YouTube transcripts by video ID
+(`bin/extract_transcripts.py`), enrich them through an LLM strategy
+(`bin/enrich_transcripts.py`, Gemini by default), and validate the resulting
+JSONL records against a schema contract (`bin/validate_schema.py`).
+Input is video IDs on stdin; output is schema-valid JSONL on stdout.
 
 ## Starting point (assumptions)
 
 Before you begin, you should already have:
 
-- A fresh Ubuntu VM that just came up (e.g. an AWS EC2 instance)
+- A fresh Ubuntu VM (e.g. an AWS EC2 instance)
 - An SSH key on the VM that can authenticate to GitHub
   (verify with `ssh -T git@github.com` → expect `Hi <username>!`)
 - `git` available (ships with Ubuntu)
@@ -18,58 +23,63 @@ Before you begin, you should already have:
 
 1. **Clone this repo onto the VM**
 
-   ```bash
-   git clone git@github.com:HankElmhurst/DS5111_hang_zdd3ga.git
-   cd DS5111_hang_zdd3ga
-   ```
+```bash
+   git clone git@github.com:HankElmhurst/2605_DS5111_zdd3ga.git
+   cd 2605_DS5111_zdd3ga
+```
 
 2. **Bootstrap the base system** — installs `make`, the Python venv package, and `tree`.
 
-   ```bash
-   bash scripts/init.sh
-   ```
+```bash
+   bash init.sh
+```
 
-   *Quick test:* run `tree`. If it lists the directory instead of "command not
-   found", the bootstrap worked.
+3. **Set your git identity**
 
-3. **Set your git identity** — tags your commits with your name and email.
+```bash
+   bash init_git_creds.sh
+```
 
-   ```bash
-   bash scripts/init_git_creds.sh
-   ```
+4. **Build the virtual environment and install dependencies**
 
-   *Quick test:* the script echoes your config. You should see your
-   `user.email` and `user.name` printed to the console. You can re-check any
-   time with `git config --global --list`.
-
-4. **Build the Python virtual environment** — `make update` creates the `env`
-   and installs everything in `requirements.txt`.
-
-   ```bash
+```bash
    make update
-   ```
+```
 
-   *Quick test:* activate the environment and list packages.
+## Environment variables
 
-   ```bash
-   . env/bin/activate
-   pip list
-   ```
+| Variable | Required | Purpose |
+|---|---|---|
+| `GEMINI_API_KEY` | Yes, for enrichment | Auth for the Google Gemini client; pipeline exits with a critical log if absent |
+| `WEBSHARE_USER` | Optional | Webshare residential proxy username for transcript extraction |
+| `WEBSHARE_PASSWORD` | Optional | Webshare residential proxy password; without both, extraction uses direct IP routing |
 
-   You should see `(env)` on the left of your prompt, and `pandas` and `numpy`
-   in the package list.
+Set these in a repo-root `.env` file (gitignored) or export them in the shell.
 
-## What's in this repo
+## Verification
 
-| File | Purpose |
+```bash
+make lint   # pylint over bin/ and tests/ — expect 10.00/10, exit 0
+make test   # pytest — expect 17 passed, 1 skipped, 1 xfailed
+```
+
+## Running the pipeline
+
+```bash
+make run    # extract → enrich (mock input) → validate
+```
+
+## Make targets
+
+| Target | Purpose |
 |---|---|
-| `scripts/init.sh` | Base system bootstrap (make, venv, tree) |
-| `scripts/init_git_creds.sh` | Sets git user.name / user.email |
-| `makefile` | `make update` builds the venv from requirements |
-| `requirements.txt` | Python packages (pandas, numpy) |
+| `make env` | Create the `env/` virtual environment |
+| `make update` | Install/refresh dependencies from requirements.txt |
+| `make lint` | Quality gate: pylint with repo pylintrc |
+| `make test` | Run the pytest suite |
+| `make run` | Execute the pipeline end-to-end |
 
 ## Notes
 
-- `make` (with no target) prints the makefile contents — handy for a quick look.
-- The `env/` virtual environment is **not** committed; it is regenerated on each
-  machine via `make update`. Keep it listed in `.gitignore`.
+- `make` (no target) prints the makefile — handy for a quick look.
+- The `env/` virtual environment is **not** committed; it is regenerated per machine via `make update`.
