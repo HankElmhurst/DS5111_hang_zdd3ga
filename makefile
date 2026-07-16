@@ -6,7 +6,7 @@ PYTHON = $(ENV)/bin/python3
 PIP = $(ENV)/bin/pip
 PYLINTRC = pylintrc
 
-.PHONY: default env update lint test run
+.PHONY: default env update lint test run load
 
 default:
 	@cat makefile
@@ -26,3 +26,7 @@ test:
 
 run:
 	$(PYTHON) bin/enrich_transcripts.py < mock_transcripts.jsonl | $(PYTHON) bin/validate_schema.py
+
+load:
+	@echo "Initiating Cloud Data Warehouse Synchronizer Node..."
+	cat data/enriched_transcripts.jsonl | python bin/load_snowflake.py
