@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract YouTube transcripts via proxy and write JSONL.""" 
+"""Extract YouTube transcripts via proxy and write JSONL."""
 import sys
 import os
 import json

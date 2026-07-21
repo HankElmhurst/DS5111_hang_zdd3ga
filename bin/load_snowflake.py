@@ -1,10 +1,12 @@
 # File location: bin/load_snowflake.py
+"""Load JSONL transcript payloads from stdin into Snowflake."""
+
 import sys
 import os
 import json
 import logging
 import snowflake.connector
-from dotenv import load_dotenv  # <-- Added to support standard .env loading
+from dotenv import load_dotenv  # Added to support standard .env loading
 
 # Establish clean centralized diagnostic logging metrics output footprint
 logging.basicConfig(
@@ -13,7 +15,8 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-def main():
+def main():    # pylint: disable=too-many-locals
+    """Connect to Snowflake and stream stdin JSONL rows into RAW_TRANSCRIPTS."""
     # Initialize the environment variables from the local .env file
     load_dotenv()  # <-- Added to ensure os.getenv() does not return None
 
@@ -34,11 +37,12 @@ def main():
     sf_warehouse = os.getenv('SF_WAREHOUSE')
     sf_database = os.getenv('SF_DATABASE')
     sf_role = os.getenv('SF_ROLE')
-    
+
     if not sf_user or not sf_password:
-        logging.critical("Missing critical Snowflake runtime credential bindings. Ingestion aborted.")
+        logging.critical("Missing critical Snowflake runtime credential bindings."
+            "Ingestion aborted.")
         sys.exit(1)
-        
+
     try:
         # Pass the pre-extracted user/password variables along with remaining context configs
         ### TODO 1 CODE START HERE
@@ -97,11 +101,11 @@ def main():
         cleaned_line = line.strip()
         if not cleaned_line:
             continue
-            
+
         try:
             # Safely validate structural correctness before invoking remote storage
             json_data = json.loads(cleaned_line)
-            
+
             # Execute safe parameterized insertion. json.dumps() handles turning the
             # validated python dictionary cleanly back into a serialized string payload.
 
@@ -112,16 +116,17 @@ def main():
             # preventing the string from being iterated as characters.
             cs.execute(sql_statement, (payload,))
             ### TODO 3 CODE END
-            
+
             # Left intact from your original template design:
-            logging.info(f"Loaded entry token item target: [{json_data.get('video_id', 
-                         'UNKNOWN')}] safely to warehouse.")
+            video_id = json_data.get('video_id', 'UNKNOWN')
+            logging.info(f"Loaded entry token item target: [{video_id}] safely to warehouse.")
+
         except Exception as e:
             logging.error(f"Skipping corrupt pipeline payload stream element: {str(e)}")
 
     # -------------------------------------------------------------------------
     # 4: Defensive Resource Reclamation Lifecycle [RESOLVED]
-    # Ensure that resource cursors and connection pools are definitively closed 
+    # Ensure that resource cursors and connection pools are definitively closed
     # out down to the operating system runtime container layout.
     # -------------------------------------------------------------------------
     ### TODO 4 CODE START
