@@ -52,3 +52,23 @@
 2026-06-29 22:10:10,285 - INFO - AFC is enabled with max remote calls: 10.
 2026-06-29 22:10:12,006 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
 2026-06-29 22:10:12,007 - INFO - Pipeline Step 2B finished.
+2026-07-09 03:35:47,358 - INFO - Pipeline Step 2B started. Selected LLM strategy: Gemini 
+2026-07-09 03:35:47,431 - INFO - Orchestrating {args.LLM} enrichment for video: ds5111_v001 
+2026-07-09 03:35:47,433 - INFO - AFC is enabled with max remote calls: 10.
+2026-07-09 03:35:47,602 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 403 Forbidden"
+2026-07-09 03:35:47,603 - ERROR - Failed processing video {video_id} during LLM generation: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}} 
+2026-07-09 03:35:47,603 - INFO - Orchestrating {args.LLM} enrichment for video: ds5111_v002 
+2026-07-09 03:35:47,603 - INFO - AFC is enabled with max remote calls: 10.
+2026-07-09 03:35:47,714 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 403 Forbidden"
+2026-07-09 03:35:47,715 - ERROR - Failed processing video {video_id} during LLM generation: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}} 
+2026-07-09 03:35:47,715 - INFO - Pipeline Step 2B finished.
+2026-07-09 03:39:12,065 - INFO - Pipeline Step 2B started. Selected LLM strategy: Gemini 
+2026-07-09 03:39:12,099 - INFO - Orchestrating {args.LLM} enrichment for video: ds5111_v001 
+2026-07-09 03:39:12,099 - INFO - AFC is enabled with max remote calls: 10.
+2026-07-09 03:39:12,259 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 403 Forbidden"
+2026-07-09 03:39:12,260 - ERROR - Failed processing video {video_id} during LLM generation: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}} 
+2026-07-09 03:39:12,260 - INFO - Orchestrating {args.LLM} enrichment for video: ds5111_v002 
+2026-07-09 03:39:12,260 - INFO - AFC is enabled with max remote calls: 10.
+2026-07-09 03:39:12,394 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 403 Forbidden"
+2026-07-09 03:39:12,395 - ERROR - Failed processing video {video_id} during LLM generation: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}} 
+2026-07-09 03:39:12,395 - INFO - Pipeline Step 2B finished.

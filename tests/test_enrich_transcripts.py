@@ -2,45 +2,55 @@ import sys
 import io
 import json
 import pytest
-from bin.enrich_transcripts import main
+from bin.enrich_transcripts import EnrichmentEngine, LLMStrategy
 
-# 1. Build a dummy container mimicking the Gemini SDK response hierarchy
-class MockGeminiResponse:
-    def __init__(self, text_payload):
-        self.text = text_payload
 
-def test_enrich_transcripts_streaming_pipeline(monkeypatch, capsys):
-    """
-    Verifies that main() reads mock lines from stdin, calls the Gemini client structure,
-    and streams verified JSON objects out to stdout without making live API network requests.
-    """
-    # 2. Mock out the core GenAI Client methods
-    def mock_generate_content(self, model, contents, config=None):
-        mock_data = {
-            "video_id": "ds5111_v001",
-            "cleaned_text": "Welcome to class. Today we are testing mock frameworks.",
-            "tech_terms": ["mock frameworks"],
-            "book_names": []
+class MockLLMStrategy(LLMStrategy):
+    """Deterministic, offline test double — no SDK, no network, no cost.
+    Returns a schema-valid enriched record so we can verify the engine's
+    stdin -> enrich -> stdout plumbing in isolation."""
+    def enrich(self, video_id: str, raw_text: str) -> dict:
+        return {
+            "video_id": video_id,
+            "cleaned_text": raw_text.replace("00:01", "").strip(),
+            "tech_terms": ["mock_term"],
+            "book_names": [],
         }
-        return MockGeminiResponse(json.dumps(mock_data))
 
-    from google.genai.models import Models
-    monkeypatch.setattr(Models, "generate_content", mock_generate_content)
 
-    # 3. Simulate your stream input pipeline using an in-memory text buffer
-    mock_input_row = {"video_id": "ds5111_v001", "raw_text": "00:01 Welcome to class. Today we are testing mock frameworks."}
-    mock_stdin = io.StringIO(json.dumps(mock_input_row) + "\n")
-    monkeypatch.setattr(sys, "stdin", mock_stdin)
+def test_engine_streams_enriched_output(monkeypatch, capsys):
+    row = {"video_id": "ds5111_v001", "raw_text": "00:01 Welcome to class."}
+    monkeypatch.setattr(sys, "stdin", io.StringIO(json.dumps(row) + "\n"))
 
-    # 4. Trigger the main pipeline script execution loop
-    main()
+    EnrichmentEngine(MockLLMStrategy()).run_stream()
 
-    # 5. Intercept the standard console text buffers
-    captured = capsys.readouterr()
-    stdout_lines = captured.out.strip().split("\n")
+    lines = capsys.readouterr().out.strip().split("\n")
+    assert len(lines) == 1
+    parsed = json.loads(lines[0])
+    assert parsed["video_id"] == "ds5111_v001"
+    assert parsed["cleaned_text"] == "Welcome to class."
+    assert parsed["tech_terms"] == ["mock_term"]
 
-    # 6. Execute data integrity validation assertions
-    assert len(stdout_lines) == 1
-    parsed_output = json.loads(stdout_lines[0])
-    assert parsed_output["video_id"] == "ds5111_v001"
-    assert "mock frameworks" in parsed_output["tech_terms"]
+
+def test_engine_skips_malformed_line(monkeypatch, capsys):
+    stream = json.dumps({"video_id": "v1", "raw_text": "ok"}) + "\nNOT_JSON\n"
+    monkeypatch.setattr(sys, "stdin", io.StringIO(stream))
+
+    EnrichmentEngine(MockLLMStrategy()).run_stream()
+
+    lines = [l for l in capsys.readouterr().out.strip().split("\n") if l]
+    assert len(lines) == 1                       # good row survives; bad row skipped
+    assert json.loads(lines[0])["video_id"] == "v1"
+
+
+def test_engine_survives_strategy_failure(monkeypatch, capsys):
+    class ExplodingStrategy(LLMStrategy):
+        def enrich(self, video_id, raw_text):
+            raise RuntimeError("simulated model outage")
+
+    monkeypatch.setattr(sys, "stdin",
+                        io.StringIO(json.dumps({"video_id": "v1", "raw_text": "ok"}) + "\n"))
+
+    EnrichmentEngine(ExplodingStrategy()).run_stream()
+
+    assert capsys.readouterr().out.strip() == ""  # nothing emitted, no crash
