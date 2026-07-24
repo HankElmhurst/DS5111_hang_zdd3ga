@@ -9,6 +9,8 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    env:
+      GEMINI_API_KEY: "test-dummy-key"
 
     # Define the execution matrix
     strategy:
