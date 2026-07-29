@@ -111,6 +111,9 @@ unsafe-load-any-extension=no
 # In verbose mode, extra non-checker-related info will be displayed.
 #verbose=
 
+# Add repo root to sys.path so pylint resolves bin.* imports (E0401); 
+# pylint doesn't read pytest.ini's pythonpath
+init-hook='import sys; sys.path.append(".")'
 
 [BASIC]
 
@@ -445,7 +448,14 @@ disable=raw-checker-failed,
         deprecated-pragma,
         use-symbolic-message-instead,
         use-implicit-booleaness-not-comparison-to-string,
-        use-implicit-booleaness-not-comparison-to-zero
+        use-implicit-booleaness-not-comparison-to-zero,
+        # Accepted design choices for Lab 6b cleanup:
+        too-few-public-methods,
+        broad-exception-caught,
+        broad-exception-raised,
+        logging-fstring-interpolation,
+        too-many-return-statements,
+        unnecessary-pass
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

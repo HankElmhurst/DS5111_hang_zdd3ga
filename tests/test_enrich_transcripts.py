@@ -1,7 +1,8 @@
+"""Tests for the enrichment engine and strategy classes."""
+
 import sys
 import io
 import json
-import pytest
 from bin.enrich_transcripts import EnrichmentEngine, LLMStrategy
 
 
@@ -19,6 +20,7 @@ class MockLLMStrategy(LLMStrategy):
 
 
 def test_engine_streams_enriched_output(monkeypatch, capsys):
+    """Engine reads a row from stdin and emits enriched JSONL."""
     row = {"video_id": "ds5111_v001", "raw_text": "00:01 Welcome to class."}
     monkeypatch.setattr(sys, "stdin", io.StringIO(json.dumps(row) + "\n"))
 
@@ -33,6 +35,7 @@ def test_engine_streams_enriched_output(monkeypatch, capsys):
 
 
 def test_engine_skips_malformed_line(monkeypatch, capsys):
+    """Malformed JSON lines are skipped, valid rows survive."""
     stream = json.dumps({"video_id": "v1", "raw_text": "ok"}) + "\nNOT_JSON\n"
     monkeypatch.setattr(sys, "stdin", io.StringIO(stream))
 
@@ -44,7 +47,9 @@ def test_engine_skips_malformed_line(monkeypatch, capsys):
 
 
 def test_engine_survives_strategy_failure(monkeypatch, capsys):
+    """Engine emits nothing and doesn't crash when strategy raises."""
     class ExplodingStrategy(LLMStrategy):
+        """Test double whose enrich() always raises."""
         def enrich(self, video_id, raw_text):
             raise RuntimeError("simulated model outage")
 
