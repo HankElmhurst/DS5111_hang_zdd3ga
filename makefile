@@ -30,3 +30,18 @@ run:
 load:
 	@echo "Initiating Cloud Data Warehouse Synchronizer Node..."
 	cat data/enriched_transcripts.jsonl | python bin/load_snowflake.py
+
+# ---- LAB08: Docker targets ----
+
+docker_build:
+	docker build -t hankelmhurst/ds5111-pipeline:latest .
+
+docker_run:
+	cat data/youtube_ids.txt | docker run -i --env-file .env hankelmhurst/ds5111-pipeline:latest
+
+docker_push:
+	docker push hankelmhurst/ds5111-pipeline:latest
+
+docker_pull_test:
+	docker rmi -f hankelmhurst/ds5111-pipeline:latest
+	cat data/youtube_ids.txt | docker run -i --env-file .env hankelmhurst/ds5111-pipeline:latest
